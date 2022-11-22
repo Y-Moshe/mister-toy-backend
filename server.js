@@ -38,9 +38,8 @@ app.use((req, res, next) => setTimeout(next, RESPONSE_DELAY))
 
 // Get toys
 app.get('/api/toy', (req, res) => {
-  const filterBy = req.query
-  toyService.query(filterBy)
-    .then((results) => res.status(200).send(results))
+  toyService.query()
+    .then(toys => res.status(200).send(toys))
 })
 
 // Get toy

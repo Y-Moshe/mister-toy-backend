@@ -10,21 +10,8 @@ module.exports = {
   save
 }
 
-function query(filterBy) {
-  const name = filterBy.name || ''
-  const page = +filterBy.page || 0
-  const itemsPerPage = +filterBy.itemsPerPage || 6
-
-  const regex = new RegExp(name, 'i')
-  let filteredToys = gToys.filter(toy => regex.test(toy.name))
-  const startIdx = page * itemsPerPage
-  const totalPages = Math.ceil(filteredToys.length / itemsPerPage)
-  if (itemsPerPage !== Infinity) filteredToys = filteredToys.slice(startIdx, startIdx + itemsPerPage)
-
-  return Promise.resolve({
-    totalPages,
-    toys: filteredToys
-  })
+function query() {
+  return Promise.resolve(gToys)
 }
 
 function getById(toyId) {
