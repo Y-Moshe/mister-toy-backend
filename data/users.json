@@ -1,0 +1,13 @@
+[
+  {
+    "username": "admin",
+    "password": "admin",
+    "_id": "TPx7p",
+    "isAdmin": true
+  },
+  {
+    "username": "test",
+    "password": "123",
+    "_id": "UTZCF"
+  }
+]
