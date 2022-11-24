@@ -4,9 +4,6 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 require('dotenv').config()
 
-const toyService = require('./services/toy.service')
-const userService = require('./services/user.service')
-
 const app = express()
 const PORT = process.env.PORT || 3030
 
@@ -32,138 +29,24 @@ if (process.env.NODE_ENV === 'production') {
 app.use(cookieParser())
 app.use(express.json())
 
-// DELAY MIDDLEWARE
+// Delay middleware
 const RESPONSE_DELAY = 1500
 app.use((req, res, next) => setTimeout(next, RESPONSE_DELAY))
 
-// Get toys
-app.get('/api/toy', (req, res) => {
-  toyService.query()
-    .then(toys => res.status(200).send(toys))
-})
+// Routes
+const authRoutes = require('./api/auth/auth.routes')
+const userRoutes = require('./api/user/user.routes')
+const toyRoutes  = require('./api/toy/toy.routes')
 
-// Get toy
-app.get('/api/toy/:toyId', (req, res) => {
-  const { toyId } = req.params
+app.use('/api/auth', authRoutes)
+app.use('/api/user', userRoutes)
+app.use('/api/toy',  toyRoutes)
 
-  toyService
-    .getById(toyId)
-    .then(toy => res.status(200).send(toy))
-    .catch(msg => res.status(400).send(msg))
-})
+// Make every server-side-route to match the index.html
+// so when requesting http://localhost:3030/index.html/car/123 it will still respond with
+// our SPA (single page app) (the index.html file) and allow vue-router to take it from there
+// app.get('/**', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public', 'index.html'))
+// })
 
-// Add toy
-app.post('/api/toy', (req, res) => {
-  // const token = req.cookies.loginToken
-  // const user = userService.validateToken(token)
-  // if (!user) return res.status(401).send('You must be logged in')
-
-  const toy = {
-    _id: null,
-    name: req.body.name,
-    price: +req.body.price,
-    labels: req.body.labels,
-    createdAt: +req.body.createdAt,
-    inStock: req.body.inStock
-  }
-
-  toyService.save(toy)
-    .then(savedToy => res.status(201).send(savedToy))
-})
-
-
-// Update toy
-app.put('/api/toy/:toyId', (req, res) => {
-  // const token = req.cookies.loginToken
-  // const user = userService.validateToken(token)
-  // if (!user) return res.status(401).send('You must be logged in')
-
-  const { toyId } = req.params
-
-  const toy = {
-    _id: toyId,
-    name: req.body.name,
-    price: +req.body.price,
-    labels: req.body.labels,
-    createdAt: +req.body.createdAt,
-    inStock: req.body.inStock
-  }
-
-  toyService
-    .save(toy)
-    .then(updatedToy => res.status(201).send(updatedToy))
-    .catch(msg => res.status(400).send(msg))
-})
-
-
-// Delete toy
-app.delete('/api/toy/:toyId', (req, res) => {
-  // const token = req.cookies.loginToken
-  // const user = userService.validateToken(token)
-  // if (!user) return res.status(401).send('You must be logged in')
-
-  const { toyId } = req.params
-
-  toyService
-    .remove(toyId)
-    .then(() => res.status(200).send('The toy is removed!'))
-    .catch((msg) => res.status(400).send(msg))
-})
-
-// AUTH ROUTES
-
-// LOGIN USER
-app.post('/api/auth/login', (req, res) => {
-  userService.checkLogin(req.body)
-    .then(user => {
-      console.log('user', user)
-      const loginToken = userService.getLoginToken(user)
-      res.cookie('loginToken', loginToken)
-      res.status(200).send(user)
-
-    }).catch(msg => res.status(401).send(msg))
-})
-
-// SIGNUP USER
-app.post('/api/auth/signup', (req, res) => {
-  userService.save(req.body)
-    .then(user => {
-      const loginToken = userService.getLoginToken(user)
-      res.cookie('loginToken', loginToken)
-      res.status(200).send(user)
-    })
-})
-
-// LOGOUT USER
-app.post('/api/auth/logout', (req, res) => {
-  res.clearCookie('loginToken')
-  res.status(200).send('Logged out')
-})
-
-// USERS ROUTES
-
-app.get('/api/user', (req, res) => {
-  const token = req.cookies.loginToken
-  const user = userService.validateToken(token)
-  if (!user || !user.isAdmin) return res.status(401).send('You are not allowed!')
-
-  userService.query()
-    .then(users => res.status(200).send(users))
-})
-
-app.get('/api/user/:username', (req, res) => {
-  const { username } = req.params
-  userService.getByUsername(username)
-    .then(user => res.status(200).send(user))
-    .catch(msg => res.status(404).send(msg))
-})
-
-app.delete('/api/user/:userId', (req, res) => {
-  const { userId } = req.params
-
-  userService.remove(userId)
-    .then(user => res.status(200).send(user))
-    .catch(msg => res.status(401).send(msg))
-})
-
-app.listen(PORT, () => console.log('Server ready at port 3030!'))
+app.listen(PORT, () => console.log(`Server ready at port: ${PORT}!`))
