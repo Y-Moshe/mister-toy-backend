@@ -13,7 +13,7 @@ router.put('/:id', requireAuth, requireAdmin, controller.updateToy)
 
 router.post('/:id/review', requireAuth, controller.addReview)
 
-router.delete('/:id/review/:reviewId', requireAuth, controller.removeReview)
+router.delete('/:id/review/:reviewId', requireAuth, requireAdmin, controller.removeReview)
 
 router.delete('/:id', requireAuth, requireAdmin, controller.removeToy)
 
