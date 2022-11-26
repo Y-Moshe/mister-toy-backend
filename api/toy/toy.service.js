@@ -44,11 +44,12 @@ async function addReview(toyId, review) {
     _id: objectId,
     txt: review
   }
-
-  return await collection.updateOne(
+  const results = await collection.updateOne(
     { _id: ObjectId(toyId) },
     { $push: { reviews: reviewToSave }}
   )
+
+  return { ...results, _id: objectId }
 }
 
 async function removeReview(toyId, reviewId) {
