@@ -1,3 +1,5 @@
+const { MONGODB_USER, MONGODB_PASASWORD } = process.env
+
 module.exports = {
-  'dbURL': 'mongodb+srv://[USER]:[PASS]@cluster0-klgzh.mongodb.net/test?retryWrites=true&w=majority',
+  'dbURL': `mongodb+srv://${MONGODB_USER}:${MONGODB_PASASWORD}@cluster0.rcaaixb.mongodb.net/?retryWrites=true&w=majority`,
 }

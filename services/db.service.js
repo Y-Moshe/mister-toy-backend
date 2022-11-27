@@ -8,7 +8,7 @@ module.exports = {
 }
 
 // Database Name
-const dbName = 'toysDB'
+const dbName = process.env.MONGODB_NAME
 
 var dbConn = null
 
