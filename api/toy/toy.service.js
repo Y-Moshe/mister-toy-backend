@@ -10,9 +10,16 @@ module.exports = {
   removeReview
 }
 
-async function query() {
+async function query(filterBy) {
   const collection = await dbService.getCollection('toy')
-  const toys =  await collection.find({}).toArray()
+  const criteria = _buildCriteria(filterBy)
+
+  const sortBy = {}
+  sortBy[filterBy.sortBy.toLowerCase()] = 1
+  const toys =  await collection
+    .find(criteria)
+    .sort(sortBy)
+    .toArray()
 
   return toys.map(_mapToyObj)
 }
@@ -72,4 +79,26 @@ function _mapToyObj(toy) {
     ...toy,
     createdAt: ObjectId(toy._id).getTimestamp()
   }
+}
+
+function _buildCriteria(filterBy = {}) {
+  const {
+    keyword, status, tags,
+    // page, itemsPerPage
+  } = filterBy
+  const criteria = {}
+
+  if (keyword) {
+    criteria.name = { $regex: keyword, $options: 'i' }
+  }
+
+  if (tags && tags.length) {
+    criteria.tags = { $in: tags }
+  }
+
+  if (status) {
+    criteria.inStock = { $eq: status === 'In-stock' ? true : false }
+  }
+
+  return criteria
 }
