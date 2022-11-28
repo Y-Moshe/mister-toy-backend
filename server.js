@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser')
 require('dotenv').config()
 
 const app = express()
+const http = require('http').createServer(app)
 const PORT = process.env.PORT || 3030
 
 if (process.env.NODE_ENV === 'production') {
@@ -20,7 +21,7 @@ if (process.env.NODE_ENV === 'production') {
       'http://127.0.0.1:3000',
       'http://localhost:3000',
     ],
-    credentials: true,
+    credentials: true
   }
   app.use(cors(corsOptions))
   app.use(express.static('public'))
@@ -37,10 +38,16 @@ app.use((req, res, next) => setTimeout(next, RESPONSE_DELAY))
 const authRoutes = require('./api/auth/auth.routes')
 const userRoutes = require('./api/user/user.routes')
 const toyRoutes  = require('./api/toy/toy.routes')
+const reviewRoutes  = require('./api/review/review.routes')
+const setupAsyncLocalStorage = require('./middlewares/setupAls')
+// require('./services/socket.service').setupSocketAPI(http)
+
+app.all('*', setupAsyncLocalStorage)
 
 app.use('/api/auth', authRoutes)
 app.use('/api/user', userRoutes)
 app.use('/api/toy',  toyRoutes)
+app.use('/api/review',  reviewRoutes)
 
 // Make every server-side-route to match the index.html
 // so when requesting http://localhost:3030/index.html/car/123 it will still respond with
@@ -49,4 +56,4 @@ app.use('/api/toy',  toyRoutes)
 //   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 // })
 
-app.listen(PORT, () => console.log(`Server ready at port: ${PORT}!`))
+http.listen(PORT, () => console.log(`Server ready at port: ${PORT}!`))
