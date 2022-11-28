@@ -42,21 +42,24 @@ function setupSocketAPI(http) {
 
         socket.on(EVENTS.SOCKET_EVENT_SEND_MSG, msg => {
             logger.info(`New chat msg from socket [id: ${socket.id}], emitting to topic ${socket.myTopic}`)
-            // emits to all sockets:
-            // gIo.emit('chat addMsg', msg)
-            // emits only to sockets in the same room
-            gIo.to(socket.myTopic).emit(EMITS.SOCKET_EMIT_ADD_MSG, msg)
+            const msgWithFN = {
+                id: 'd-' + Date.now(),
+                fullname: socket.fullname || 'Guest',
+                txt: msg
+            }
+
+            gIo.to(socket.myTopic).emit(EMITS.SOCKET_EMIT_ADD_MSG, msgWithFN)
         })
 
         socket.on(EVENTS.SOCKET_EVENT_USER_WATCH, userId => {
             logger.info(`user-watch from socket [id: ${socket.id}], on user ${userId}`)
             socket.join('watching:' + userId)
-
         })
 
-        socket.on(EVENTS.SOCKET_EVENT_SET_USER_SOCKET, userId => {
+        socket.on(EVENTS.SOCKET_EVENT_SET_USER_SOCKET, ({ _id: userId, fullname }) => {
             logger.info(`Setting socket.userId = ${userId} for socket [id: ${socket.id}]`)
             socket.userId = userId
+            socket.fullname = fullname
         })
 
         socket.on(EVENTS.SOCKET_EVENT_UNSET_USER_SOCKET, () => {
