@@ -73,7 +73,7 @@ async function remove(reviewId) {
 async function add({ userId, toyId, txt }) {
   try {
     const reviewToAdd = {
-      userId: ObjectId(userId),
+      userId: userId ? ObjectId(userId) : userId,
       toyId: ObjectId(toyId),
       txt
     }
@@ -90,6 +90,7 @@ async function add({ userId, toyId, txt }) {
 function _buildCriteria(filterBy) {
   const criteria = {}
   if (filterBy.userId) criteria.userId = filterBy.userId
+  if (filterBy.toyId) criteria.toyId = filterBy.toyId
   return criteria
 }
 
