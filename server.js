@@ -40,7 +40,7 @@ const userRoutes = require('./api/user/user.routes')
 const toyRoutes  = require('./api/toy/toy.routes')
 const reviewRoutes  = require('./api/review/review.routes')
 const setupAsyncLocalStorage = require('./middlewares/setupAls')
-// require('./services/socket.service').setupSocketAPI(http)
+require('./services/socket.service').setupSocketAPI(http)
 
 app.all('*', setupAsyncLocalStorage)
 

@@ -1,7 +1,6 @@
 const logger = require('../../services/logger.service')
 const toyService = require('../toy/toy.service')
-const authService = require('../auth/auth.service')
-// const socketService = require('../../services/socket.service')
+const socketService = require('../../services/socket.service')
 const reviewService = require('./review.service')
 
 async function getReviews(req, res) {
@@ -15,10 +14,21 @@ async function getReviews(req, res) {
 }
 
 async function deleteReview(req, res) {
+  const { id: reviewId } = req.params
+  const { loggedinUser } = req
+
   try {
-    const { deletedCount, toyId } = await reviewService.remove(req.params.id)
+    const { deletedCount, toyId } = await reviewService.remove(reviewId)
     if (deletedCount === 1) {
-      await toyService.removeReview(toyId, req.params.id)
+      await toyService.removeReview(toyId, reviewId)
+
+      socketService.broadcast({
+        type: socketService.emits.SOCKET_EMIT_REVIEW_REMOVED,
+        data: reviewId,
+        room: toyId.toString(),
+        userId: loggedinUser._id
+      })
+
       res.send({ msg: 'Deleted successfully' })
     } else {
       res.status(400).send({ err: 'Cannot remove review' })
@@ -40,11 +50,12 @@ async function addReview(req, res) {
 
     await toyService.addReview(review.toyId, review)
 
-    // socketService.broadcast({type: 'review-added', data: review, userId: loggedinUser._id})
-    // socketService.emitToUser({type: 'review-about-you', data: review, userId: review.aboutUser._id})
-
-    // const fullUser = await userService.getById(loggedinUser._id)
-    // socketService.emitTo({type: 'user-updated', data: fullUser, label: fullUser._id})
+    socketService.broadcast({
+      type: socketService.emits.SOCKET_EMIT_REVIEW_ADDED,
+      data: review,
+      room: review.toyId.toString(),
+      userId: loggedinUser._id
+    })
 
     res.send(review)
 
