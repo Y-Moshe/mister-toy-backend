@@ -46,17 +46,12 @@ async function save(toy) {
 
 async function addReview(toyId, review) {
   const collection = await dbService.getCollection('toy')
-  const objectId = new ObjectId()
-  const reviewToSave = {
-    _id: objectId,
-    txt: review
-  }
-  const results = await collection.updateOne(
+  await collection.updateOne(
     { _id: ObjectId(toyId) },
-    { $push: { reviews: reviewToSave }}
+    { $push: { reviews: review }}
   )
 
-  return { ...results, _id: objectId }
+  return review
 }
 
 async function removeReview(toyId, reviewId) {
